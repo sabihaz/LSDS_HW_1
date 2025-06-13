@@ -1,0 +1,25 @@
+// GenomeAnalyzer.h
+#ifndef GENOME_ANALYZER_H
+#define GENOME_ANALYZER_H
+
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+class GenomeAnalyzer {
+private:
+    std::string genome;                     // Full genome string
+    std::vector<std::string> scaffoldNames; // Names of scaffolds
+    std::vector<int> scaffoldLengths;       // Lengths of scaffolds
+    std::string longestScaffoldName;
+    int longestScaffoldLength = 0;
+
+public:
+    bool readGenomeFile(const std::string& filepath);
+    void printScaffoldStats() const;
+    std::unordered_map<char, long long> countNucleotides();
+    void replaceNwithA();
+    double calculateATContent();
+};
+
+#endif // GENOME_ANALYZER_H

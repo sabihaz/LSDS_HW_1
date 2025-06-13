@@ -1,0 +1,95 @@
+// GenomeAnalyzer.cpp
+#include "GenomeAnalyzer.h"
+#include <fstream>
+#include <iostream>
+#include <chrono>
+
+bool GenomeAnalyzer::readGenomeFile(const std::string& filepath) {
+    std::ifstream infile(filepath);
+    if (!infile.is_open()) {
+        std::cerr << "Error opening file.\n";
+        return false;
+    }
+
+    std::string line;
+    std::string currentScaffold = "";
+    int currentLength = 0;
+    std::string currentName;
+
+    while (std::getline(infile, line)) {
+        if (line[0] == '>') {
+            if (!currentScaffold.empty()) {
+                scaffoldNames.push_back(currentName);
+                scaffoldLengths.push_back(currentLength);
+                if (currentLength > longestScaffoldLength) {
+                    longestScaffoldLength = currentLength;
+                    longestScaffoldName = currentName;
+                }
+                genome += currentScaffold;
+                currentScaffold = "";
+                currentLength = 0;
+            }
+            currentName = line.substr(1); // skip '>'
+        } else {
+            currentScaffold += line;
+            currentLength += line.length();
+        }
+    }
+
+    // handle last scaffold
+    if (!currentScaffold.empty()) {
+        scaffoldNames.push_back(currentName);
+        scaffoldLengths.push_back(currentLength);
+        if (currentLength > longestScaffoldLength) {
+            longestScaffoldLength = currentLength;
+            longestScaffoldName = currentName;
+        }
+        genome += currentScaffold;
+    }
+
+    infile.close();
+    return true;
+}
+
+void GenomeAnalyzer::printScaffoldStats() const {
+    std::cout << "Total scaffolds: " << scaffoldNames.size() << "\n";
+    std::cout << "Longest scaffold: " << longestScaffoldName 
+              << " (" << longestScaffoldLength << " bp)\n";
+
+    long long totalLength = 0;
+    for (int len : scaffoldLengths)
+        totalLength += len;
+    
+    double averageLength = static_cast<double>(totalLength) / scaffoldLengths.size();
+    std::cout << "Average scaffold length: " << averageLength << " bp\n";
+}
+
+std::unordered_map<char, long long> GenomeAnalyzer::countNucleotides() {
+    std::unordered_map<char, long long> counts = {{'A', 0}, {'C', 0}, {'G', 0}, {'T', 0}};
+    for (char base : genome) {
+        if (counts.find(base) != counts.end())
+            counts[base]++;
+    }
+    return counts;
+}
+
+void GenomeAnalyzer::replaceNwithA() {
+    for (char& base : genome) {
+        if (base == 'N' || base == 'n') base = 'A';
+    }
+}
+
+double GenomeAnalyzer::calculateATContent() {
+    long long countA = 0, countT = 0;
+
+    for (char base : genome) {
+        if (base == 'A') countA++;
+        if (base == 'T') countT++;
+    }
+
+    long long total = genome.size();
+    if (total == 0) return 0;
+
+    double atContent = static_cast<double>(countA + countT) / total * 100.0;
+    return atContent;
+}

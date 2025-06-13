@@ -1,0 +1,38 @@
+// main.cpp
+#include "GenomeAnalyzer.h"
+#include <iostream>
+#include <chrono>
+
+int main() {
+    GenomeAnalyzer ga;
+    std::string filepath = "/common/contrib/classroom/inf503/genomes/human.txt";
+
+    if (!ga.readGenomeFile(filepath)) {
+        return 1;
+    }
+
+    std::cout << "Genome file successfully loaded.\n\n";
+    ga.printScaffoldStats();
+
+    // Replace 'N' with 'A'
+    ga.replaceNwithA();
+
+    // Count nucleotide content with timing
+    auto start = std::chrono::high_resolution_clock::now();
+    auto counts = ga.countNucleotides();
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "\nNucleotide counts:\n";
+    for (auto& pair : counts) {
+        std::cout << pair.first << ": " << pair.second << "\n";
+    }
+
+    std::chrono::duration<double> duration = end - start;
+    std::cout << "Time to count nucleotides: " << duration.count() << " seconds\n";
+
+    // AT content
+    double atContent = ga.calculateATContent();
+    std::cout << "AT Content: " << atContent << "%\n";
+
+    return 0;
+}

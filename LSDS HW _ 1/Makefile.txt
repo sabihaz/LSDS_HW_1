@@ -1,0 +1,25 @@
+# Compiler and flags
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall -O2
+
+# Target binary
+TARGET = genome_analyzer
+
+# Source files
+SRCS = main.cpp genome.cpp
+OBJS = $(SRCS:.cpp=.o)
+
+# Default target
+all: $(TARGET)
+
+# Linking
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+
+# Compile each .cpp file into .o
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Clean up
+clean:
+	rm -f $(OBJS) $(TARGET)
